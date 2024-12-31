@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { AlertCircle } from 'lucide-react';
 
-const CLIENT_ID = '539348670655-f2a4fnq8dmjfuhru2eqsvv36c1r4i0k7.apps.googleusercontent.com'; // Replace with your Google Client ID
-const API_KEY = 'AIzaSyAeWD5uO4_5hDkm8fROSUURPXMGfgnPC1Q'; // Replace with your Google API key
-const SPREADSHEET_ID = '1CcbLwXHU9A7TaPdJh3DX9f3R_xhLshhraNeT_wkajYU'; // Replace with your Google Sheets ID
-const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
+const SPREADSHEET_ID = process.env.REACT_APP_SPREADSHEET_ID;
+const SCOPES = process.env.REACT_APP_SCOPES;
+
+// const CLIENT_ID = '539348670655-f2a4fnq8dmjfuhru2eqsvv36c1r4i0k7.apps.googleusercontent.com'; // Replace with your Google Client ID
+// const API_KEY = 'AIzaSyAeWD5uO4_5hDkm8fROSUURPXMGfgnPC1Q'; // Replace with your Google API key
+// const SPREADSHEET_ID = '1CcbLwXHU9A7TaPdJh3DX9f3R_xhLshhraNeT_wkajYU'; // Replace with your Google Sheets ID
+// const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
 const ExpenseLogger = () => {
   const [expense, setExpense] = useState({
