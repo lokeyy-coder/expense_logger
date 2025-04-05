@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
-// import { AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
 const SPREADSHEET_ID = process.env.REACT_APP_SPREADSHEET_ID;
-const SCOPES = process.env.REACT_APP_SCOPES;
+const DISCOVERY_DOC = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
+const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
 const ExpenseLogger = () => {
   const [expense, setExpense] = useState({
@@ -16,6 +16,7 @@ const ExpenseLogger = () => {
   const [errors, setErrors] = useState({});
   const [showSuccess, setShowSuccess] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [tokenClient, setTokenClient] = useState(null);
 
   const categories = [
     'Food & Dining',
@@ -30,42 +31,81 @@ const ExpenseLogger = () => {
     'Others'
   ];
 
-  const initializeGoogleAPI = useCallback(() => {
-    window.gapi.load('client:auth2', async () => {
-      try {
-        await window.gapi.client.init({
-          apiKey: API_KEY,
-          clientId: CLIENT_ID,
-          scope: SCOPES
-        });
-        
-        await window.gapi.client.load('sheets', 'v4');
-        
-        const authInstance = window.gapi.auth2.getAuthInstance();
-        authInstance.isSignedIn.listen(updateSigninStatus);
-        updateSigninStatus(authInstance.isSignedIn.get());
-        console.log('Google API initialized and Sheets API loaded');
-      } catch (error) {
-        console.error('Error initializing Google API or Sheets API:', error);
-      }
-    });
+  useEffect(() => {
+    // Load the Google API client and Identity Services script
+    const loadGoogleScripts = () => {
+      const gsiScript = document.createElement('script');
+      gsiScript.src = 'https://accounts.google.com/gsi/client';
+      gsiScript.async = true;
+      gsiScript.defer = true;
+      document.body.appendChild(gsiScript);
+
+      const gapiScript = document.createElement('script');
+      gapiScript.src = 'https://apis.google.com/js/api.js';
+      gapiScript.async = true;
+      gapiScript.defer = true;
+      gapiScript.onload = initializeGapiClient;
+      document.body.appendChild(gapiScript);
+    };
+
+    loadGoogleScripts();
   }, []);
 
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://apis.google.com/js/api.js';
-    script.onload = initializeGoogleAPI;
-    document.body.appendChild(script);
-  }, [initializeGoogleAPI]);
+  const initializeGapiClient = async () => {
+    try {
+      await new Promise((resolve, reject) => {
+        window.gapi.load('client', { callback: resolve, onerror: reject });
+      });
+      
+      await window.gapi.client.init({
+        apiKey: API_KEY,
+        discoveryDocs: [DISCOVERY_DOC],
+      });
+      
+      console.log('GAPI client initialized');
+      
+      // Now initialize the Google Identity Services client
+      if (window.google && window.google.accounts) {
+        initializeGoogleIdentityServices();
+      } else {
+        // If Google Identity Services isn't loaded yet, wait for it
+        const checkGsiLoaded = setInterval(() => {
+          if (window.google && window.google.accounts) {
+            clearInterval(checkGsiLoaded);
+            initializeGoogleIdentityServices();
+          }
+        }, 100);
+      }
+    } catch (error) {
+      console.error('Error initializing GAPI client:', error);
+    }
+  };
 
-  const updateSigninStatus = (status) => {
-    console.log('Sign-in status updated:', status);
-    setIsSignedIn(status);
+  const initializeGoogleIdentityServices = () => {
+    const client = window.google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: SCOPES,
+      callback: handleTokenResponse,
+    });
+    
+    setTokenClient(client);
+    console.log('Google Identity Services initialized');
+  };
+
+  const handleTokenResponse = (response) => {
+    if (response && response.access_token) {
+      setIsSignedIn(true);
+      console.log('Successfully signed in');
+    } else {
+      setIsSignedIn(false);
+      console.error('Error during sign in', response);
+    }
   };
 
   const handleAuthClick = () => {
-    if (!isSignedIn) {
-      window.gapi.auth2.getAuthInstance().signIn();
+    if (!isSignedIn && tokenClient) {
+      // Request an access token
+      tokenClient.requestAccessToken();
     }
   };
 
@@ -130,14 +170,66 @@ const ExpenseLogger = () => {
       {showSuccess && <div className="mb-4 p-4 bg-green-100 text-green-700">Expense logged successfully!</div>}
       {!isSignedIn && <div className="mb-4 p-4 bg-blue-100 text-blue-700">Please sign in with Google</div>}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input type="date" name="date" value={expense.date} onChange={handleChange} className="w-full p-2 border rounded" />
-        <input type="number" name="amount" value={expense.amount} onChange={handleChange} className="w-full p-2 border rounded" />
-        <select name="category" value={expense.category} onChange={handleChange} className="w-full p-2 border rounded">
-          <option value="">Select a category</option>
-          {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-        </select>
-        <textarea name="description" value={expense.description} onChange={handleChange} className="w-full p-2 border rounded"></textarea>
-        <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded">{isSignedIn ? 'Log Expense' : 'Sign in with Google'}</button>
+        <div>
+          <label htmlFor="date" className="block text-sm font-medium text-gray-700">Date</label>
+          <input 
+            type="date" 
+            id="date"
+            name="date" 
+            value={expense.date} 
+            onChange={handleChange} 
+            className={`w-full p-2 border rounded ${errors.date ? 'border-red-500' : 'border-gray-300'}`} 
+          />
+          {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date}</p>}
+        </div>
+        
+        <div>
+          <label htmlFor="amount" className="block text-sm font-medium text-gray-700">Amount</label>
+          <input 
+            type="number" 
+            id="amount"
+            name="amount" 
+            value={expense.amount} 
+            onChange={handleChange} 
+            placeholder="0.00"
+            className={`w-full p-2 border rounded ${errors.amount ? 'border-red-500' : 'border-gray-300'}`} 
+          />
+          {errors.amount && <p className="text-red-500 text-xs mt-1">{errors.amount}</p>}
+        </div>
+        
+        <div>
+          <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>
+          <select 
+            id="category"
+            name="category" 
+            value={expense.category} 
+            onChange={handleChange} 
+            className={`w-full p-2 border rounded ${errors.category ? 'border-red-500' : 'border-gray-300'}`}
+          >
+            <option value="">Select a category</option>
+            {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+          </select>
+          {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category}</p>}
+        </div>
+        
+        <div>
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+          <textarea 
+            id="description"
+            name="description" 
+            value={expense.description} 
+            onChange={handleChange} 
+            placeholder="Enter expense details"
+            className="w-full p-2 border border-gray-300 rounded"
+          ></textarea>
+        </div>
+        
+        <button 
+          type="submit" 
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded transition duration-200"
+        >
+          {isSignedIn ? 'Log Expense' : 'Sign in with Google'}
+        </button>
       </form>
     </div>
   );
