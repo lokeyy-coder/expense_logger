@@ -201,7 +201,7 @@ const ExpenseLogger = () => {
           <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>
           <select 
             id="category"
-            name="category" 
+            name="category"
             value={expense.category} 
             onChange={handleChange} 
             className={`w-full p-2 border rounded ${errors.category ? 'border-red-500' : 'border-gray-300'}`}
