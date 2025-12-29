@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import SpendingChart from './SpendingChart';
 
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
@@ -166,6 +167,9 @@ const ExpenseLogger = () => {
   return (
     <div className="expense-logger-container">
       <div className="expense-logger-content">
+        {/* Spending Chart Section */}
+        <SpendingChart isSignedIn={isSignedIn} />
+
         {/* Header */}
         <div className="header">
           <h1>EXPENSE LOGGER</h1>
