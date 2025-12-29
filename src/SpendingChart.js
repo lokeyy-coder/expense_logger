@@ -7,13 +7,17 @@ import {
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  LineElement,
+  PointElement
 } from 'chart.js';
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
+  LineElement,
+  PointElement,
   Title,
   Tooltip,
   Legend
@@ -22,8 +26,11 @@ ChartJS.register(
 const SpendingChart = ({ isSignedIn }) => {
   const [chartData, setChartData] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedWeek, setSelectedWeek] = useState('All');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [currentDate, setCurrentDate] = useState('');
+  const [currentWeek, setCurrentWeek] = useState('');
 
   const categories = [
     'All',
@@ -40,6 +47,31 @@ const SpendingChart = ({ isSignedIn }) => {
     'Household Goods (e.g. Medicine, Cleaning, Small goods)',
     'Others'
   ];
+
+  // Generate week numbers 1-52
+  const weekNumbers = ['All', ...Array.from({ length: 52 }, (_, i) => `${i + 1}`)];
+
+  // Calculate current date and week number
+  React.useEffect(() => {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-AU', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+    const weekNum = getWeekNumber(now);
+    setCurrentDate(dateStr);
+    setCurrentWeek(`Week ${weekNum}`);
+  }, []);
+
+  const getWeekNumber = (date) => {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  };
 
   const fetchDataAndGenerateChart = async () => {
     if (!isSignedIn) {
@@ -66,10 +98,10 @@ const SpendingChart = ({ isSignedIn }) => {
       }
 
       // Process the data
-      const processedData = processSpendingData(rows, selectedCategory);
+      const processedData = processSpendingData(rows, selectedCategory, selectedWeek);
       
       if (!processedData || processedData.labels.length === 0) {
-        setError('No data available for the selected category');
+        setError('No data available for the selected filters');
         setLoading(false);
         return;
       }
@@ -83,7 +115,7 @@ const SpendingChart = ({ isSignedIn }) => {
     }
   };
 
-  const processSpendingData = (rows, category) => {
+  const processSpendingData = (rows, category, weekFilter) => {
     // First row is headers
     const headers = rows[0];
     const dataRows = rows.slice(1);
@@ -92,11 +124,29 @@ const SpendingChart = ({ isSignedIn }) => {
     const weekNumIndex = headers.findIndex(h => h === 'WeekNum');
     const amountIndex = headers.findIndex(h => h === 'Amount');
     const categoryIndex = headers.findIndex(h => h === 'Category');
+    const weeklyBudgetIndex = headers.findIndex(h => h === 'Weekly Budget');
+    const descriptionIndex = headers.findIndex(h => h === 'Description');
     
     if (weekNumIndex === -1 || amountIndex === -1 || categoryIndex === -1) {
       console.error('Required columns not found. Headers:', headers);
       return null;
     }
+    
+    // Get weekly budget for selected category
+    let weeklyBudget = 0;
+    dataRows.forEach(row => {
+      const description = row[descriptionIndex] || '';
+      const expenseCategory = row[categoryIndex];
+      const budget = parseFloat(row[weeklyBudgetIndex]) || 0;
+      
+      if (description.toLowerCase() === 'initialise') {
+        if (category === 'All') {
+          weeklyBudget += budget;
+        } else if (expenseCategory === category) {
+          weeklyBudget = budget;
+        }
+      }
+    });
     
     // Group data by week number
     const weeklySpending = {};
@@ -112,6 +162,15 @@ const SpendingChart = ({ isSignedIn }) => {
       // Filter by category if not "All"
       if (category !== 'All' && expenseCategory !== category) {
         return;
+      }
+      
+      // Filter by week if not "All"
+      if (weekFilter !== 'All') {
+        // Extract just the week number from formats like "2025-W01" or "1"
+        const weekNumOnly = weekNum.toString().match(/\d+$/)?.[0];
+        if (weekNumOnly !== weekFilter) {
+          return;
+        }
       }
       
       // Accumulate spending by week
@@ -135,16 +194,29 @@ const SpendingChart = ({ isSignedIn }) => {
     });
     
     const amounts = sortedWeeks.map(week => weeklySpending[week]);
+    const budgetLine = sortedWeeks.map(() => weeklyBudget);
 
     return {
       labels: sortedWeeks,
       datasets: [
         {
+          type: 'bar',
           label: category === 'All' ? 'Total Spending' : `${category} Spending`,
           data: amounts,
           backgroundColor: 'rgba(43, 43, 43, 0.8)',
           borderColor: 'rgba(43, 43, 43, 1)',
           borderWidth: 1,
+        },
+        {
+          type: 'line',
+          label: 'Weekly Budget',
+          data: budgetLine,
+          borderColor: 'rgba(211, 47, 47, 1)',
+          backgroundColor: 'rgba(211, 47, 47, 0.1)',
+          borderWidth: 2,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          borderDash: [5, 5],
         },
       ],
     };
@@ -183,7 +255,7 @@ const SpendingChart = ({ isSignedIn }) => {
         padding: 12,
         callbacks: {
           label: function(context) {
-            return `$${context.parsed.y.toFixed(2)}`;
+            return `${context.dataset.label}: $${context.parsed.y.toFixed(2)}`;
           }
         }
       },
@@ -246,19 +318,41 @@ const SpendingChart = ({ isSignedIn }) => {
     <div className="spending-chart-container">
       <h2 className="chart-title">EXPENSE TRACKER</h2>
       
+      {/* Current Date and Week */}
+      <div className="date-info">
+        <p className="current-date">{currentDate}</p>
+        <p className="current-week">{currentWeek}</p>
+      </div>
+      
       <div className="chart-controls">
-        <div className="category-selector">
-          <label htmlFor="category-select">CATEGORY:</label>
-          <select
-            id="category-select"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="category-dropdown"
-          >
-            {categories.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
+        <div className="filter-row">
+          <div className="filter-group">
+            <label htmlFor="category-select">CATEGORY:</label>
+            <select
+              id="category-select"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="filter-dropdown"
+            >
+              {categories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="filter-group">
+            <label htmlFor="week-select">WEEK:</label>
+            <select
+              id="week-select"
+              value={selectedWeek}
+              onChange={(e) => setSelectedWeek(e.target.value)}
+              className="filter-dropdown"
+            >
+              {weekNumbers.map(week => (
+                <option key={week} value={week}>{week}</option>
+              ))}
+            </select>
+          </div>
         </div>
         
         <button 
