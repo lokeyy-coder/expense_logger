@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, Calendar, Tag, FileText } from 'lucide-react';
 
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
@@ -51,6 +50,7 @@ const ExpenseLogger = () => {
     };
 
     loadGoogleScripts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const initializeGapiClient = async () => {
@@ -164,137 +164,88 @@ const ExpenseLogger = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-lg">
+    <div className="expense-logger-container">
+      <div className="expense-logger-content">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl mb-4 shadow-lg">
-            <DollarSign className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Expense Logger</h1>
-          <p className="text-gray-600">Track your spending effortlessly</p>
+        <div className="header">
+          <h1>EXPENSE LOGGER</h1>
+          <p className="subtitle">Track your spending with ease</p>
         </div>
 
         {/* Success Message */}
         {showSuccess && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 animate-fadeIn">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-green-800 font-medium">Expense logged successfully!</span>
+          <div className="message success-message">
+            ✓ Expense logged successfully!
           </div>
         )}
 
         {/* Sign In Prompt */}
         {!isSignedIn && (
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center gap-3">
-            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-            <span className="text-blue-800 font-medium">Please sign in to continue</span>
+          <div className="message info-message">
+            Please sign in with Google to continue
           </div>
         )}
 
-        {/* Main Form Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Date Field */}
-            <div>
-              <label htmlFor="date" className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-indigo-500" />
-                Date
-              </label>
-              <input 
-                type="date" 
-                id="date"
-                name="date" 
-                value={expense.date} 
-                onChange={handleChange} 
-                className={`w-full px-4 py-3 border rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                  errors.date ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-gray-300'
-                }`} 
-              />
-              {errors.date && <p className="text-red-500 text-xs mt-2 ml-1">{errors.date}</p>}
-            </div>
-            
-            {/* Amount Field */}
-            <div>
-              <label htmlFor="amount" className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-indigo-500" />
-                Amount
-              </label>
-              <div className="relative">
-                <span className="absolute left-4 top-3.5 text-gray-500 font-medium">$</span>
-                <input 
-                  type="number" 
-                  id="amount"
-                  name="amount" 
-                  value={expense.amount} 
-                  onChange={handleChange} 
-                  placeholder="0.00"
-                  step="0.01"
-                  className={`w-full pl-8 pr-4 py-3 border rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                    errors.amount ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-gray-300'
-                  }`} 
-                />
-              </div>
-              {errors.amount && <p className="text-red-500 text-xs mt-2 ml-1">{errors.amount}</p>}
-            </div>
-            
-            {/* Category Field */}
-            <div>
-              <label htmlFor="category" className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <Tag className="w-4 h-4 text-indigo-500" />
-                Category
-              </label>
-              <select 
-                id="category"
-                name="category"
-                value={expense.category} 
-                onChange={handleChange} 
-                className={`w-full px-4 py-3 border rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none bg-white ${
-                  errors.category ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-gray-300'
-                }`}
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 1rem center',
-                  backgroundSize: '1.25rem'
-                }}
-              >
-                <option value="">Select a category</option>
-                {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-              </select>
-              {errors.category && <p className="text-red-500 text-xs mt-2 ml-1">{errors.category}</p>}
-            </div>
-            
-            {/* Description Field */}
-            <div>
-              <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <FileText className="w-4 h-4 text-indigo-500" />
-                Description <span className="text-gray-400 font-normal">(optional)</span>
-              </label>
-              <textarea 
-                id="description"
-                name="description" 
-                value={expense.description} 
-                onChange={handleChange} 
-                placeholder="Add any additional details..."
-                rows="3"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent hover:border-gray-300 resize-none"
-              ></textarea>
-            </div>
-            
-            {/* Submit Button */}
-            <button 
-              type="submit" 
-              className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-3.5 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0"
-            >
-              {isSignedIn ? 'Log Expense' : 'Sign in with Google'}
-            </button>
-          </form>
-        </div>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="expense-form">
+          <div className="form-group">
+            <input 
+              type="date" 
+              id="date"
+              name="date" 
+              value={expense.date} 
+              onChange={handleChange}
+              placeholder="* DATE"
+              className={errors.date ? 'error' : ''}
+            />
+            {errors.date && <span className="error-text">{errors.date}</span>}
+          </div>
 
-        {/* Footer */}
-        <p className="text-center text-sm text-gray-500 mt-6">
-          Securely synced with Google Sheets
-        </p>
+          <div className="form-group">
+            <input 
+              type="number" 
+              id="amount"
+              name="amount" 
+              value={expense.amount} 
+              onChange={handleChange} 
+              placeholder="* AMOUNT"
+              step="0.01"
+              className={errors.amount ? 'error' : ''}
+            />
+            {errors.amount && <span className="error-text">{errors.amount}</span>}
+          </div>
+
+          <div className="form-group">
+            <select 
+              id="category"
+              name="category"
+              value={expense.category} 
+              onChange={handleChange}
+              className={errors.category ? 'error' : ''}
+            >
+              <option value="">* CATEGORY</option>
+              {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+            </select>
+            {errors.category && <span className="error-text">{errors.category}</span>}
+          </div>
+
+          <div className="form-group">
+            <textarea 
+              id="description"
+              name="description" 
+              value={expense.description} 
+              onChange={handleChange} 
+              placeholder="DESCRIPTION (OPTIONAL)"
+              rows="4"
+            ></textarea>
+          </div>
+
+          <button type="submit" className="submit-button">
+            {isSignedIn ? 'SUBMIT' : 'SIGN IN WITH GOOGLE'}
+          </button>
+        </form>
+
+        <p className="footer-text">* Required Fields</p>
       </div>
     </div>
   );
