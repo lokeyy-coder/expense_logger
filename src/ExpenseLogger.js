@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { DollarSign, Calendar, Tag, FileText } from 'lucide-react';
 
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
@@ -19,20 +20,21 @@ const ExpenseLogger = () => {
   const [tokenClient, setTokenClient] = useState(null);
 
   const categories = [
-    'Food & Dining',
-    'Groceries',
-    'Petrol',
     'Dating Allowance',
-    'Wellbeing Allowance - Andrew',
-    'Wellbeing Allowance - Emmy',
-    'Utilities (Water, Gas & Elec)',
+    'Petrol',
     'Gift Allowance',
+    'Wellbeing allowance - Andrew',
+    'Wellbeing allowance - Emmy',
+    'Wellbeing allowance - Together',
     'Car Expenses',
+    'Utilities (Water, Gas & Elec)',
+    'Groceries',
+    'Food & Dining',
+    'Household Goods (e.g. Medicine, Cleaning, Small goods)',
     'Others'
   ];
 
   useEffect(() => {
-    // Load the Google API client and Identity Services script
     const loadGoogleScripts = () => {
       const gsiScript = document.createElement('script');
       gsiScript.src = 'https://accounts.google.com/gsi/client';
@@ -64,11 +66,9 @@ const ExpenseLogger = () => {
       
       console.log('GAPI client initialized');
       
-      // Now initialize the Google Identity Services client
       if (window.google && window.google.accounts) {
         initializeGoogleIdentityServices();
       } else {
-        // If Google Identity Services isn't loaded yet, wait for it
         const checkGsiLoaded = setInterval(() => {
           if (window.google && window.google.accounts) {
             clearInterval(checkGsiLoaded);
@@ -104,7 +104,6 @@ const ExpenseLogger = () => {
 
   const handleAuthClick = () => {
     if (!isSignedIn && tokenClient) {
-      // Request an access token
       tokenClient.requestAccessToken();
     }
   };
@@ -165,72 +164,138 @@ const ExpenseLogger = () => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-4 bg-white shadow-md rounded-md">
-      <h2 className="text-2xl font-bold text-center">Log Expense</h2>
-      {showSuccess && <div className="mb-4 p-4 bg-green-100 text-green-700">Expense logged successfully!</div>}
-      {!isSignedIn && <div className="mb-4 p-4 bg-blue-100 text-blue-700">Please sign in with Google</div>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="date" className="block text-sm font-medium text-gray-700">Date</label>
-          <input 
-            type="date" 
-            id="date"
-            name="date" 
-            value={expense.date} 
-            onChange={handleChange} 
-            className={`w-full p-2 border rounded ${errors.date ? 'border-red-500' : 'border-gray-300'}`} 
-          />
-          {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date}</p>}
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-lg">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl mb-4 shadow-lg">
+            <DollarSign className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Expense Logger</h1>
+          <p className="text-gray-600">Track your spending effortlessly</p>
         </div>
-        
-        <div>
-          <label htmlFor="amount" className="block text-sm font-medium text-gray-700">Amount</label>
-          <input 
-            type="number" 
-            id="amount"
-            name="amount" 
-            value={expense.amount} 
-            onChange={handleChange} 
-            placeholder="0.00"
-            className={`w-full p-2 border rounded ${errors.amount ? 'border-red-500' : 'border-gray-300'}`} 
-          />
-          {errors.amount && <p className="text-red-500 text-xs mt-1">{errors.amount}</p>}
+
+        {/* Success Message */}
+        {showSuccess && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 animate-fadeIn">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-green-800 font-medium">Expense logged successfully!</span>
+          </div>
+        )}
+
+        {/* Sign In Prompt */}
+        {!isSignedIn && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center gap-3">
+            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+            <span className="text-blue-800 font-medium">Please sign in to continue</span>
+          </div>
+        )}
+
+        {/* Main Form Card */}
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Date Field */}
+            <div>
+              <label htmlFor="date" className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-indigo-500" />
+                Date
+              </label>
+              <input 
+                type="date" 
+                id="date"
+                name="date" 
+                value={expense.date} 
+                onChange={handleChange} 
+                className={`w-full px-4 py-3 border rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                  errors.date ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-gray-300'
+                }`} 
+              />
+              {errors.date && <p className="text-red-500 text-xs mt-2 ml-1">{errors.date}</p>}
+            </div>
+            
+            {/* Amount Field */}
+            <div>
+              <label htmlFor="amount" className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <DollarSign className="w-4 h-4 text-indigo-500" />
+                Amount
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-3.5 text-gray-500 font-medium">$</span>
+                <input 
+                  type="number" 
+                  id="amount"
+                  name="amount" 
+                  value={expense.amount} 
+                  onChange={handleChange} 
+                  placeholder="0.00"
+                  step="0.01"
+                  className={`w-full pl-8 pr-4 py-3 border rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                    errors.amount ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-gray-300'
+                  }`} 
+                />
+              </div>
+              {errors.amount && <p className="text-red-500 text-xs mt-2 ml-1">{errors.amount}</p>}
+            </div>
+            
+            {/* Category Field */}
+            <div>
+              <label htmlFor="category" className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <Tag className="w-4 h-4 text-indigo-500" />
+                Category
+              </label>
+              <select 
+                id="category"
+                name="category"
+                value={expense.category} 
+                onChange={handleChange} 
+                className={`w-full px-4 py-3 border rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none bg-white ${
+                  errors.category ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-gray-300'
+                }`}
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 1rem center',
+                  backgroundSize: '1.25rem'
+                }}
+              >
+                <option value="">Select a category</option>
+                {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+              </select>
+              {errors.category && <p className="text-red-500 text-xs mt-2 ml-1">{errors.category}</p>}
+            </div>
+            
+            {/* Description Field */}
+            <div>
+              <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <FileText className="w-4 h-4 text-indigo-500" />
+                Description <span className="text-gray-400 font-normal">(optional)</span>
+              </label>
+              <textarea 
+                id="description"
+                name="description" 
+                value={expense.description} 
+                onChange={handleChange} 
+                placeholder="Add any additional details..."
+                rows="3"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent hover:border-gray-300 resize-none"
+              ></textarea>
+            </div>
+            
+            {/* Submit Button */}
+            <button 
+              type="submit" 
+              className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-3.5 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0"
+            >
+              {isSignedIn ? 'Log Expense' : 'Sign in with Google'}
+            </button>
+          </form>
         </div>
-        
-        <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>
-          <select 
-            id="category"
-            name="category"
-            value={expense.category} 
-            onChange={handleChange} 
-            className={`w-full p-2 border rounded ${errors.category ? 'border-red-500' : 'border-gray-300'}`}
-          >
-            <option value="">Select a category</option>
-            {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-          </select>
-          {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category}</p>}
-        </div>
-        
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
-          <textarea 
-            id="description"
-            name="description" 
-            value={expense.description} 
-            onChange={handleChange} 
-            placeholder="Enter expense details"
-            className="w-full p-2 border border-gray-300 rounded"
-          ></textarea>
-        </div>
-        
-        <button 
-          type="submit" 
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded transition duration-200"
-        >
-          {isSignedIn ? 'Log Expense' : 'Sign in with Google'}
-        </button>
-      </form>
+
+        {/* Footer */}
+        <p className="text-center text-sm text-gray-500 mt-6">
+          Securely synced with Google Sheets
+        </p>
+      </div>
     </div>
   );
 };
