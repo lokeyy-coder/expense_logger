@@ -5,18 +5,22 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
+  BarController,
+  LineElement,
+  LineController,
+  PointElement,
   Title,
   Tooltip,
-  Legend,
-  LineElement,
-  PointElement
+  Legend
 } from 'chart.js';
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
+  BarController,
   LineElement,
+  LineController,
   PointElement,
   Title,
   Tooltip,
@@ -134,19 +138,21 @@ const SpendingChart = ({ isSignedIn }) => {
     
     // Get weekly budget for selected category
     let weeklyBudget = 0;
-    dataRows.forEach(row => {
-      const description = row[descriptionIndex] || '';
-      const expenseCategory = row[categoryIndex];
-      const budget = parseFloat(row[weeklyBudgetIndex]) || 0;
-      
-      if (description.toLowerCase() === 'initialise') {
-        if (category === 'All') {
-          weeklyBudget += budget;
-        } else if (expenseCategory === category) {
-          weeklyBudget = budget;
+    if (weeklyBudgetIndex !== -1 && descriptionIndex !== -1) {
+      dataRows.forEach(row => {
+        const description = row[descriptionIndex] || '';
+        const expenseCategory = row[categoryIndex];
+        const budget = parseFloat(row[weeklyBudgetIndex]) || 0;
+        
+        if (description.toLowerCase() === 'initialise') {
+          if (category === 'All') {
+            weeklyBudget += budget;
+          } else if (expenseCategory === category) {
+            weeklyBudget = budget;
+          }
         }
-      }
-    });
+      });
+    }
     
     // Group data by week number
     const weeklySpending = {};
