@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import SpendingChart from './SpendingChart';
+import TransactionsList from './TransactionsList';
 
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
@@ -111,10 +112,13 @@ const ExpenseLogger = () => {
 
   const handleSignOut = () => {
     if (window.google && window.google.accounts && window.google.accounts.oauth2) {
-      window.google.accounts.oauth2.revoke(window.gapi.client.getToken().access_token, () => {
-        setIsSignedIn(false);
-        console.log('Signed out successfully');
-      });
+      const token = window.gapi.client.getToken();
+      if (token) {
+        window.google.accounts.oauth2.revoke(token.access_token, () => {
+          setIsSignedIn(false);
+          console.log('Signed out successfully');
+        });
+      }
     }
   };
 
@@ -178,7 +182,8 @@ const ExpenseLogger = () => {
       <div className="expense-logger-content">
         {/* Top Header with Sign In Button */}
         <div className="top-header">
-          <h1 className="main-title">EXPENSE LOGGER</h1>
+          <h1 className="main-title">2026 EXPENSE TRACKER</h1>
+          <p className="auth-title">Sign in to Google Account</p>
           <div className="auth-section">
             {!isSignedIn ? (
               <button onClick={handleAuthClick} className="auth-button sign-in">
@@ -273,6 +278,9 @@ const ExpenseLogger = () => {
         </form>
 
         <p className="footer-text">* Required Fields</p>
+
+        {/* Transactions List Section */}
+        <TransactionsList isSignedIn={isSignedIn} categories={categories} />
       </div>
     </div>
   );

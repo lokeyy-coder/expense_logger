@@ -322,7 +322,7 @@ const SpendingChart = ({ isSignedIn }) => {
 
   return (
     <div className="spending-chart-container">
-      <h2 className="chart-title">EXPENSE TRACKER</h2>
+      <h2 className="chart-title">WEEKLY EXPENSE SUMMARY</h2>
       
       {/* Current Date and Week */}
       <div className="date-info">
