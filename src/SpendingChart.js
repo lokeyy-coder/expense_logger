@@ -62,7 +62,7 @@ const SpendingChart = ({ isSignedIn }) => {
       weekday: 'long', 
       year: 'numeric', 
       month: 'long', 
-      day: 'numeric' 
+      day: 'numeric'
     });
     const weekNum = getWeekNumber(now);
     setCurrentDate(dateStr);

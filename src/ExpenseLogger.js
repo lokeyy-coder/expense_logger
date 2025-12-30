@@ -104,8 +104,17 @@ const ExpenseLogger = () => {
   };
 
   const handleAuthClick = () => {
-    if (!isSignedIn && tokenClient) {
+    if (tokenClient) {
       tokenClient.requestAccessToken();
+    }
+  };
+
+  const handleSignOut = () => {
+    if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+      window.google.accounts.oauth2.revoke(window.gapi.client.getToken().access_token, () => {
+        setIsSignedIn(false);
+        console.log('Signed out successfully');
+      });
     }
   };
 
@@ -141,7 +150,7 @@ const ExpenseLogger = () => {
     const newErrors = validateForm();
     if (Object.keys(newErrors).length === 0) {
       if (!isSignedIn) {
-        handleAuthClick();
+        setErrors({ submit: 'Please sign in with Google first' });
         return;
       }
 
@@ -167,12 +176,31 @@ const ExpenseLogger = () => {
   return (
     <div className="expense-logger-container">
       <div className="expense-logger-content">
+        {/* Top Header with Sign In Button */}
+        <div className="top-header">
+          <h1 className="main-title">EXPENSE LOGGER</h1>
+          <div className="auth-section">
+            {!isSignedIn ? (
+              <button onClick={handleAuthClick} className="auth-button sign-in">
+                SIGN IN WITH GOOGLE
+              </button>
+            ) : (
+              <div className="signed-in-section">
+                <span className="signed-in-indicator">✓ Signed In</span>
+                <button onClick={handleSignOut} className="auth-button sign-out">
+                  SIGN OUT
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Spending Chart Section */}
         <SpendingChart isSignedIn={isSignedIn} />
 
         {/* Header */}
         <div className="header">
-          <h1>EXPENSE LOGGER</h1>
+          <h2 className="section-title">LOG NEW EXPENSE</h2>
           <p className="subtitle">Track your spending with ease</p>
         </div>
 
@@ -180,13 +208,6 @@ const ExpenseLogger = () => {
         {showSuccess && (
           <div className="message success-message">
             ✓ Expense logged successfully!
-          </div>
-        )}
-
-        {/* Sign In Prompt */}
-        {!isSignedIn && (
-          <div className="message info-message">
-            Please sign in with Google to continue
           </div>
         )}
 
@@ -244,8 +265,10 @@ const ExpenseLogger = () => {
             ></textarea>
           </div>
 
+          {errors.submit && <p className="error-text" style={{textAlign: 'center'}}>{errors.submit}</p>}
+
           <button type="submit" className="submit-button">
-            {isSignedIn ? 'SUBMIT' : 'SIGN IN WITH GOOGLE'}
+            SUBMIT
           </button>
         </form>
 
