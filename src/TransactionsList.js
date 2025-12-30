@@ -8,6 +8,7 @@ const TransactionsList = ({ isSignedIn, categories }) => {
   const [error, setError] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editedTransaction, setEditedTransaction] = useState({});
+  const [sheetId, setSheetId] = useState(null);
 
   const transactionLimits = ['5', '10', '15', '20', 'All'];
   const allCategories = ['All', ...categories];
@@ -23,6 +24,22 @@ const TransactionsList = ({ isSignedIn, categories }) => {
 
     try {
       const SPREADSHEET_ID = process.env.REACT_APP_SPREADSHEET_ID;
+      
+      // Get sheet metadata to find the correct sheetId
+      const sheetMetadata = await window.gapi.client.sheets.spreadsheets.get({
+        spreadsheetId: SPREADSHEET_ID,
+      });
+      
+      // Find the Tracker_Sheet sheetId
+      const trackerSheet = sheetMetadata.result.sheets.find(
+        sheet => sheet.properties.title === 'Tracker_Sheet'
+      );
+      
+      if (trackerSheet) {
+        setSheetId(trackerSheet.properties.sheetId);
+        console.log('Found Tracker_Sheet with sheetId:', trackerSheet.properties.sheetId);
+      }
+
       const response = await window.gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
         range: 'Tracker_Sheet!A:D',
@@ -30,16 +47,17 @@ const TransactionsList = ({ isSignedIn, categories }) => {
 
       const rows = response.result.values;
       
-      if (!rows || rows.length === 0) {
+      if (!rows || rows.length <= 1) {
         setError('No transactions found');
         setTransactions([]);
         setLoading(false);
         return;
       }
 
-      // Process transactions (assuming no header row, data starts from row 1)
-      let processedTransactions = rows.map((row, index) => ({
-        rowIndex: index + 1, // Actual row number in sheet
+      // Skip the header row (first row) and process transactions
+      const dataRows = rows.slice(1);
+      let processedTransactions = dataRows.map((row, index) => ({
+        rowIndex: index + 2, // +2 because: +1 for header row, +1 for 1-based indexing
         date: row[0] || '',
         amount: row[1] || '',
         category: row[2] || '',
@@ -125,17 +143,26 @@ const TransactionsList = ({ isSignedIn, categories }) => {
       return;
     }
 
+    if (sheetId === null) {
+      setError('Sheet ID not found. Please reload transactions first.');
+      return;
+    }
+
+    setLoading(true);
+
     try {
       const SPREADSHEET_ID = process.env.REACT_APP_SPREADSHEET_ID;
       
+      console.log('Deleting row:', transaction.rowIndex, 'from sheetId:', sheetId);
+      
       // Delete the row using batchUpdate
-      await window.gapi.client.sheets.spreadsheets.batchUpdate({
+      const response = await window.gapi.client.sheets.spreadsheets.batchUpdate({
         spreadsheetId: SPREADSHEET_ID,
         resource: {
           requests: [{
             deleteDimension: {
               range: {
-                sheetId: 0, // Assuming first sheet, adjust if needed
+                sheetId: sheetId,
                 dimension: 'ROWS',
                 startIndex: transaction.rowIndex - 1, // 0-indexed
                 endIndex: transaction.rowIndex // Exclusive
@@ -145,10 +172,15 @@ const TransactionsList = ({ isSignedIn, categories }) => {
         }
       });
 
+      console.log('Delete response:', response);
+      
+      setLoading(false);
       fetchTransactions(); // Refresh the list
     } catch (err) {
       console.error('Error deleting transaction:', err);
-      setError('Failed to delete transaction. You may need to adjust the sheetId.');
+      console.error('Error details:', err.result);
+      setError(`Failed to delete transaction: ${err.result?.error?.message || err.message}`);
+      setLoading(false);
     }
   };
 
@@ -290,12 +322,14 @@ const TransactionsList = ({ isSignedIn, categories }) => {
                           <button
                             onClick={() => handleEdit(transaction)}
                             className="action-btn edit-btn"
+                            disabled={loading}
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleDelete(transaction)}
                             className="action-btn delete-btn"
+                            disabled={loading}
                           >
                             Delete
                           </button>
