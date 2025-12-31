@@ -200,86 +200,86 @@ const ExpenseLogger = () => {
           </div>
         </div>
 
-        {/* Spending Chart Section */}
-        <SpendingChart isSignedIn={isSignedIn} />
+        {/* SECTION 1: Expense Form */}
+        <div className="section-container expense-form-section">
+          <div className="header">
+            <h2 className="section-title">LOG NEW EXPENSE</h2>
+            <p className="subtitle">Track your spending with ease</p>
+          </div>
 
-        {/* Header */}
-        <div className="header">
-          <h2 className="section-title">LOG NEW EXPENSE</h2>
-          <p className="subtitle">Track your spending with ease</p>
+          {showSuccess && (
+            <div className="message success-message">
+              ✓ Expense logged successfully!
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="expense-form">
+            <div className="form-group">
+              <input 
+                type="date" 
+                id="date"
+                name="date" 
+                value={expense.date} 
+                onChange={handleChange}
+                placeholder="* DATE"
+                className={errors.date ? 'error' : ''}
+              />
+              {errors.date && <span className="error-text">{errors.date}</span>}
+            </div>
+
+            <div className="form-group">
+              <input 
+                type="number" 
+                id="amount"
+                name="amount" 
+                value={expense.amount} 
+                onChange={handleChange} 
+                placeholder="* AMOUNT"
+                step="0.01"
+                className={errors.amount ? 'error' : ''}
+              />
+              {errors.amount && <span className="error-text">{errors.amount}</span>}
+            </div>
+
+            <div className="form-group">
+              <select 
+                id="category"
+                name="category"
+                value={expense.category} 
+                onChange={handleChange}
+                className={errors.category ? 'error' : ''}
+              >
+                <option value="">* CATEGORY</option>
+                {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+              </select>
+              {errors.category && <span className="error-text">{errors.category}</span>}
+            </div>
+
+            <div className="form-group">
+              <textarea 
+                id="description"
+                name="description" 
+                value={expense.description} 
+                onChange={handleChange} 
+                placeholder="DESCRIPTION (OPTIONAL)"
+                rows="4"
+              ></textarea>
+            </div>
+
+            {errors.submit && <p className="error-text" style={{textAlign: 'center'}}>{errors.submit}</p>}
+
+            <button type="submit" className="submit-button">
+              SUBMIT
+            </button>
+          </form>
+
+          <p className="footer-text">* Required Fields</p>
         </div>
 
-        {/* Success Message */}
-        {showSuccess && (
-          <div className="message success-message">
-            ✓ Expense logged successfully!
-          </div>
-        )}
+        {/* SECTION 2: Spending Chart */}
+        <SpendingChart isSignedIn={isSignedIn} />
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="expense-form">
-          <div className="form-group">
-            <input 
-              type="date" 
-              id="date"
-              name="date" 
-              value={expense.date} 
-              onChange={handleChange}
-              placeholder="* DATE"
-              className={errors.date ? 'error' : ''}
-            />
-            {errors.date && <span className="error-text">{errors.date}</span>}
-          </div>
-
-          <div className="form-group">
-            <input 
-              type="number" 
-              id="amount"
-              name="amount" 
-              value={expense.amount} 
-              onChange={handleChange} 
-              placeholder="* AMOUNT"
-              step="0.01"
-              className={errors.amount ? 'error' : ''}
-            />
-            {errors.amount && <span className="error-text">{errors.amount}</span>}
-          </div>
-
-          <div className="form-group">
-            <select 
-              id="category"
-              name="category"
-              value={expense.category} 
-              onChange={handleChange}
-              className={errors.category ? 'error' : ''}
-            >
-              <option value="">* CATEGORY</option>
-              {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-            </select>
-            {errors.category && <span className="error-text">{errors.category}</span>}
-          </div>
-
-          <div className="form-group">
-            <textarea 
-              id="description"
-              name="description" 
-              value={expense.description} 
-              onChange={handleChange} 
-              placeholder="DESCRIPTION (OPTIONAL)"
-              rows="4"
-            ></textarea>
-          </div>
-
-          {errors.submit && <p className="error-text" style={{textAlign: 'center'}}>{errors.submit}</p>}
-
-          <button type="submit" className="submit-button">
-            SUBMIT
-          </button>
-        </form>
-
-        <p className="footer-text">* Required Fields</p>
-
-        {/* Transactions List Section */}
+        {/* SECTION 3: Transactions List */}
         <TransactionsList isSignedIn={isSignedIn} categories={categories} />
       </div>
     </div>
