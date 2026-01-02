@@ -64,6 +64,11 @@ const TransactionsList = ({ isSignedIn, categories }) => {
         description: row[3] || ''
       }));
 
+      // ALWAYS filter out transactions with description "Initialise" FIRST
+      processedTransactions = processedTransactions.filter(
+        t => t.description !== 'Initialise'
+      );
+
       // Filter by category
       if (selectedCategory !== 'All') {
         processedTransactions = processedTransactions.filter(
