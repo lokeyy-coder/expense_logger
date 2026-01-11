@@ -59,11 +59,45 @@ const CumulativeBudgetTracker = ({ isSignedIn }) => {
   }, []);
 
   const getWeekNumber = (date) => {
-    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    const dayNum = d.getUTCDay() || 7;
-    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    
+    const yearStart = new Date(d.getFullYear(), 0, 1);
+    yearStart.setHours(0, 0, 0, 0);
+    
+    // Calculate days since start of year (0-based)
+    const daysSinceYearStart = Math.floor((d - yearStart) / (24 * 60 * 60 * 1000));
+    
+    // Get day of week for Jan 1st (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    const jan1DayOfWeek = yearStart.getDay();
+    
+    // Calculate days until the first Monday
+    // Week 1 is from Jan 1 until the Sunday before the first Monday
+    // Week 2 starts on the first Monday
+    let daysToFirstMonday;
+    if (jan1DayOfWeek === 1) {
+      // Jan 1 is Monday, so first Monday is Jan 1 itself (Week 1 would be 0 days, doesn't exist)
+      // Actually, if Jan 1 is Monday, then Week 1 is Mon-Sun (7 days)
+      daysToFirstMonday = 7;
+    } else if (jan1DayOfWeek === 0) {
+      // Jan 1 is Sunday, first Monday is Jan 2 (Week 1 is just 1 day)
+      daysToFirstMonday = 1;
+    } else {
+      // Jan 1 is Tue-Sat, first Monday is some days away
+      // Days from Jan 1 to the next Monday
+      daysToFirstMonday = 8 - jan1DayOfWeek;
+    }
+    
+    // If we're still in Week 1
+    if (daysSinceYearStart < daysToFirstMonday) {
+      return 1;
+    }
+    
+    // Calculate week number from the first Monday onwards
+    const daysFromFirstMonday = daysSinceYearStart - daysToFirstMonday;
+    const weekNumber = Math.floor(daysFromFirstMonday / 7) + 2;
+    
+    return weekNumber;
   };
 
   const fetchDataAndGenerateChart = async () => {
