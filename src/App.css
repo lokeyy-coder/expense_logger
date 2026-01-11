@@ -648,6 +648,214 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
 }
 
+/* Weekly Insights Styles */
+.weekly-insights-container {
+  background-color: #fff;
+  border: 1px solid #c8c3b8;
+  padding: 30px;
+  margin-bottom: 60px;
+}
+
+.insights-title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #2b2b2b;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* Scorecard */
+.scorecard {
+  background-color: #f8f8f8;
+  border: 2px solid #2b2b2b;
+  padding: 30px;
+  margin-bottom: 30px;
+}
+
+.scorecard-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.scorecard-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.scorecard-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.scorecard-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2b2b2b;
+  line-height: 1.2;
+}
+
+.scorecard-value.positive {
+  color: #4caf50;
+}
+
+.scorecard-value.negative {
+  color: #d32f2f;
+}
+
+.scorecard-subtext {
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+}
+
+.scorecard-percentage {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2b2b2b;
+}
+
+.scorecard-icon {
+  font-size: 24px;
+  margin-top: 4px;
+}
+
+.scorecard-status {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
+.scorecard-status.success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.scorecard-status.warning {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+/* Category Bar Charts */
+.category-bars-container {
+  background-color: #fff;
+  border: 2px solid #2b2b2b;
+  padding: 24px;
+}
+
+.category-bars-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #2b2b2b;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.category-bars-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.category-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.category-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.category-bar-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2b2b2b;
+  letter-spacing: 0.5px;
+}
+
+.category-bar-amounts {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+}
+
+.category-bar-wrapper {
+  width: 100%;
+}
+
+.category-bar-track {
+  width: 100%;
+  height: 32px;
+  background-color: #e8e4dc;
+  border: 1px solid #c8c3b8;
+  border-radius: 4px;
+  overflow: visible;
+  position: relative;
+}
+
+.category-bar-fill {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 12px;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+  position: relative;
+  min-width: 60px;
+}
+
+.category-bar-fill.good {
+  background-color: #4caf50;
+}
+
+.category-bar-fill.near-budget {
+  background-color: #f57c00;
+}
+
+.category-bar-fill.over-budget {
+  background-color: #d32f2f;
+}
+
+.category-bar-percent {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* If bar is too short, show percentage outside */
+.category-bar-fill[style*="width: 0%"] .category-bar-percent,
+.category-bar-fill[style*="width: 1%"] .category-bar-percent,
+.category-bar-fill[style*="width: 2%"] .category-bar-percent,
+.category-bar-fill[style*="width: 3%"] .category-bar-percent,
+.category-bar-fill[style*="width: 4%"] .category-bar-percent,
+.category-bar-fill[style*="width: 5%"] .category-bar-percent {
+  position: absolute;
+  right: -45px;
+  color: #2b2b2b;
+  text-shadow: none;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .expense-logger-content {
@@ -704,6 +912,49 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   .action-btn {
     width: 100%;
     padding: 6px 10px;
+  }
+
+  .scorecard-row {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .scorecard {
+    padding: 20px;
+  }
+  
+  .scorecard-value {
+    font-size: 24px;
+  }
+  
+  .category-bars-container {
+    padding: 16px;
+  }
+  
+  .category-bar-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .category-bar-name {
+    font-size: 12px;
+  }
+  
+  .category-bar-amounts {
+    font-size: 11px;
+  }
+  
+  .category-bar-track {
+    height: 28px;
+  }
+  
+  .category-bar-fill {
+    padding-right: 8px;
+  }
+  
+  .category-bar-percent {
+    font-size: 11px;
   }
 }
 

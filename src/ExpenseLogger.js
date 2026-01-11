@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SpendingChart from './SpendingChart';
 import TransactionsList from './TransactionsList';
+import WeeklyInsights from './WeeklyInsights';
 
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
@@ -276,10 +277,13 @@ const ExpenseLogger = () => {
           <p className="footer-text">* Required Fields</p>
         </div>
 
-        {/* SECTION 2: Spending Chart */}
+        {/* SECTION 2: Weekly Insights */}
+        <WeeklyInsights isSignedIn={isSignedIn} />
+
+        {/* SECTION 3: Spending Chart */}
         <SpendingChart isSignedIn={isSignedIn} />
 
-        {/* SECTION 3: Transactions List */}
+        {/* SECTION 4: Transactions List */}
         <TransactionsList isSignedIn={isSignedIn} categories={categories} />
       </div>
     </div>
