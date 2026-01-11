@@ -287,13 +287,12 @@ const WeeklyInsights = ({ isSignedIn }) => {
                     </div>
                     <div className="category-bar-wrapper">
                       <div className="category-bar-track">
-                        {/* 100% Budget Marker */}
+                        {/* 100% Budget Marker - No Label */}
                         {insights.chartScale > 100 && (
                           <div 
                             className="budget-marker-line" 
                             style={{ left: `${marker100Position}%` }}
                           >
-                            <span className="budget-marker-label">100%</span>
                           </div>
                         )}
                         

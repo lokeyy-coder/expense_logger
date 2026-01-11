@@ -20,6 +20,9 @@ const ExpenseLogger = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [tokenClient, setTokenClient] = useState(null);
+  
+  // State for collapsible sections
+  const [expandedSection, setExpandedSection] = useState(null);
 
   const categories = [
     'Dating Allowance',
@@ -178,6 +181,10 @@ const ExpenseLogger = () => {
     }
   };
 
+  const toggleSection = (section) => {
+    setExpandedSection(expandedSection === section ? null : section);
+  };
+
   return (
     <div className="expense-logger-container">
       <div className="expense-logger-content">
@@ -201,90 +208,151 @@ const ExpenseLogger = () => {
           </div>
         </div>
 
-        {/* SECTION 1: Expense Form */}
-        <div className="section-container expense-form-section">
-          <div className="header">
-            <h2 className="section-title">LOG NEW EXPENSE</h2>
-            <p className="subtitle">Track your spending with ease</p>
+        {/* Menu Navigation */}
+        <div className="menu-navigation">
+          <h2 className="menu-title">WHAT WOULD YOU LIKE TO DO?</h2>
+          
+          {/* Menu Item 1: Log New Expense */}
+          <div className="menu-item-container">
+            <button 
+              className={`menu-item ${expandedSection === 'log-expense' ? 'active' : ''}`}
+              onClick={() => toggleSection('log-expense')}
+            >
+              <span className="menu-item-icon">📝</span>
+              <span className="menu-item-text">LOG NEW EXPENSE</span>
+              <span className="menu-item-arrow">{expandedSection === 'log-expense' ? '▼' : '▶'}</span>
+            </button>
+            {expandedSection === 'log-expense' && (
+              <div className="menu-item-content">
+                <div className="section-container expense-form-section">
+                  <div className="header">
+                    <h2 className="section-title">LOG NEW EXPENSE</h2>
+                    <p className="subtitle">Track your spending with ease</p>
+                  </div>
+
+                  {showSuccess && (
+                    <div className="message success-message">
+                      ✓ Expense logged successfully!
+                    </div>
+                  )}
+
+                  <form onSubmit={handleSubmit} className="expense-form">
+                    <div className="form-group">
+                      <input 
+                        type="date" 
+                        id="date"
+                        name="date" 
+                        value={expense.date} 
+                        onChange={handleChange}
+                        placeholder="* DATE"
+                        className={errors.date ? 'error' : ''}
+                      />
+                      {errors.date && <span className="error-text">{errors.date}</span>}
+                    </div>
+
+                    <div className="form-group">
+                      <input 
+                        type="number" 
+                        id="amount"
+                        name="amount" 
+                        value={expense.amount} 
+                        onChange={handleChange} 
+                        placeholder="* AMOUNT"
+                        step="0.01"
+                        className={errors.amount ? 'error' : ''}
+                      />
+                      {errors.amount && <span className="error-text">{errors.amount}</span>}
+                    </div>
+
+                    <div className="form-group">
+                      <select 
+                        id="category"
+                        name="category"
+                        value={expense.category} 
+                        onChange={handleChange}
+                        className={errors.category ? 'error' : ''}
+                      >
+                        <option value="">* CATEGORY</option>
+                        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                      </select>
+                      {errors.category && <span className="error-text">{errors.category}</span>}
+                    </div>
+
+                    <div className="form-group">
+                      <textarea 
+                        id="description"
+                        name="description" 
+                        value={expense.description} 
+                        onChange={handleChange} 
+                        placeholder="DESCRIPTION (OPTIONAL)"
+                        rows="4"
+                      ></textarea>
+                    </div>
+
+                    {errors.submit && <p className="error-text" style={{textAlign: 'center'}}>{errors.submit}</p>}
+
+                    <button type="submit" className="submit-button">
+                      SUBMIT
+                    </button>
+                  </form>
+
+                  <p className="footer-text">* Required Fields</p>
+                </div>
+              </div>
+            )}
           </div>
 
-          {showSuccess && (
-            <div className="message success-message">
-              ✓ Expense logged successfully!
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="expense-form">
-            <div className="form-group">
-              <input 
-                type="date" 
-                id="date"
-                name="date" 
-                value={expense.date} 
-                onChange={handleChange}
-                placeholder="* DATE"
-                className={errors.date ? 'error' : ''}
-              />
-              {errors.date && <span className="error-text">{errors.date}</span>}
-            </div>
-
-            <div className="form-group">
-              <input 
-                type="number" 
-                id="amount"
-                name="amount" 
-                value={expense.amount} 
-                onChange={handleChange} 
-                placeholder="* AMOUNT"
-                step="0.01"
-                className={errors.amount ? 'error' : ''}
-              />
-              {errors.amount && <span className="error-text">{errors.amount}</span>}
-            </div>
-
-            <div className="form-group">
-              <select 
-                id="category"
-                name="category"
-                value={expense.category} 
-                onChange={handleChange}
-                className={errors.category ? 'error' : ''}
-              >
-                <option value="">* CATEGORY</option>
-                {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-              </select>
-              {errors.category && <span className="error-text">{errors.category}</span>}
-            </div>
-
-            <div className="form-group">
-              <textarea 
-                id="description"
-                name="description" 
-                value={expense.description} 
-                onChange={handleChange} 
-                placeholder="DESCRIPTION (OPTIONAL)"
-                rows="4"
-              ></textarea>
-            </div>
-
-            {errors.submit && <p className="error-text" style={{textAlign: 'center'}}>{errors.submit}</p>}
-
-            <button type="submit" className="submit-button">
-              SUBMIT
+          {/* Menu Item 2: See Weekly Performance */}
+          <div className="menu-item-container">
+            <button 
+              className={`menu-item ${expandedSection === 'weekly-performance' ? 'active' : ''}`}
+              onClick={() => toggleSection('weekly-performance')}
+            >
+              <span className="menu-item-icon">📊</span>
+              <span className="menu-item-text">SEE WEEKLY PERFORMANCE</span>
+              <span className="menu-item-arrow">{expandedSection === 'weekly-performance' ? '▼' : '▶'}</span>
             </button>
-          </form>
+            {expandedSection === 'weekly-performance' && (
+              <div className="menu-item-content">
+                <WeeklyInsights isSignedIn={isSignedIn} />
+              </div>
+            )}
+          </div>
 
-          <p className="footer-text">* Required Fields</p>
+          {/* Menu Item 3: See Weekly Spending Trend */}
+          <div className="menu-item-container">
+            <button 
+              className={`menu-item ${expandedSection === 'spending-trend' ? 'active' : ''}`}
+              onClick={() => toggleSection('spending-trend')}
+            >
+              <span className="menu-item-icon">📈</span>
+              <span className="menu-item-text">SEE WEEKLY SPENDING TREND</span>
+              <span className="menu-item-arrow">{expandedSection === 'spending-trend' ? '▼' : '▶'}</span>
+            </button>
+            {expandedSection === 'spending-trend' && (
+              <div className="menu-item-content">
+                <SpendingChart isSignedIn={isSignedIn} />
+              </div>
+            )}
+          </div>
+
+          {/* Menu Item 4: See Previous Transactions */}
+          <div className="menu-item-container">
+            <button 
+              className={`menu-item ${expandedSection === 'transactions' ? 'active' : ''}`}
+              onClick={() => toggleSection('transactions')}
+            >
+              <span className="menu-item-icon">📋</span>
+              <span className="menu-item-text">SEE PREVIOUS TRANSACTIONS</span>
+              <span className="menu-item-arrow">{expandedSection === 'transactions' ? '▼' : '▶'}</span>
+            </button>
+            {expandedSection === 'transactions' && (
+              <div className="menu-item-content">
+                <TransactionsList isSignedIn={isSignedIn} categories={categories} />
+              </div>
+            )}
+          </div>
         </div>
-
-        {/* SECTION 2: Weekly Insights */}
-        <WeeklyInsights isSignedIn={isSignedIn} />
-
-        {/* SECTION 3: Spending Chart */}
-        <SpendingChart isSignedIn={isSignedIn} />
-
-        {/* SECTION 4: Transactions List */}
-        <TransactionsList isSignedIn={isSignedIn} categories={categories} />
       </div>
     </div>
   );
