@@ -5,6 +5,10 @@ const WeeklyInsights = ({ isSignedIn }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentWeek, setCurrentWeek] = useState(1);
+  const [selectedWeek, setSelectedWeek] = useState('Current');
+
+  // Generate week numbers 1-52
+  const weekOptions = ['Current', ...Array.from({ length: 52 }, (_, i) => `${i + 1}`)];
 
   // Calculate current week number
   useEffect(() => {
@@ -45,7 +49,10 @@ const WeeklyInsights = ({ isSignedIn }) => {
         return;
       }
 
-      const processedInsights = processWeeklyScorecard(rows, currentWeek);
+      // Determine which week to analyze
+      const weekToAnalyze = selectedWeek === 'Current' ? currentWeek : parseInt(selectedWeek);
+
+      const processedInsights = processWeeklyScorecard(rows, weekToAnalyze);
       setInsights(processedInsights);
       setLoading(false);
     } catch (err) {
@@ -110,6 +117,7 @@ const WeeklyInsights = ({ isSignedIn }) => {
     let totalLastWeek = 0;
     let totalBudget = 0;
     let categoriesOnTrack = 0;
+    let maxPercentUsed = 0;
     
     // Build category details for bar charts
     const categoryDetails = [];
@@ -133,11 +141,14 @@ const WeeklyInsights = ({ isSignedIn }) => {
       
       // Only include categories with budgets > 0
       if (budget > 0) {
+        const percentUsed = (thisWeek / budget) * 100;
+        maxPercentUsed = Math.max(maxPercentUsed, percentUsed);
+        
         categoryDetails.push({
           category,
           spent: thisWeek,
           budget,
-          percentUsed: (thisWeek / budget) * 100
+          percentUsed
         });
       }
     });
@@ -149,6 +160,9 @@ const WeeklyInsights = ({ isSignedIn }) => {
     const totalPercentChange = totalLastWeek > 0 ? (totalDifference / totalLastWeek) * 100 : 0;
     const totalCategories = categoriesWithBudgets.length;
 
+    // Calculate dynamic scale for bar chart (minimum 100%, but extend if needed)
+    const chartScale = Math.max(100, Math.ceil(maxPercentUsed / 20) * 20); // Round up to nearest 20%
+
     return {
       weekNum,
       totalThisWeek,
@@ -158,14 +172,36 @@ const WeeklyInsights = ({ isSignedIn }) => {
       totalPercentChange,
       categoriesOnTrack,
       totalCategories,
-      categoryDetails
+      categoryDetails,
+      chartScale
     };
   };
 
   return (
     <div className="weekly-insights-container">
-      <h2 className="insights-title">WEEK {currentWeek} SPENDING SCORECARD</h2>
+      <h2 className="insights-title">
+        WEEK {selectedWeek === 'Current' ? currentWeek : selectedWeek} SPENDING SCORECARD
+      </h2>
       
+      {/* Week Filter */}
+      <div className="insights-filter">
+        <div className="filter-group">
+          <label htmlFor="week-filter-select">WEEK:</label>
+          <select
+            id="week-filter-select"
+            value={selectedWeek}
+            onChange={(e) => setSelectedWeek(e.target.value)}
+            className="filter-dropdown"
+          >
+            {weekOptions.map(week => (
+              <option key={week} value={week}>
+                {week === 'Current' ? `Current (Week ${currentWeek})` : `Week ${week}`}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <button 
         onClick={fetchInsights}
         disabled={loading || !isSignedIn}
@@ -223,12 +259,21 @@ const WeeklyInsights = ({ isSignedIn }) => {
             </div>
           </div>
 
-          {/* Category Bar Charts */}
+          {/* Category Bar Charts with Dynamic Scale */}
           <div className="category-bars-container">
             <h3 className="category-bars-title">BUDGET USAGE BY CATEGORY</h3>
+            <div className="category-bars-legend">
+              <span className="legend-text">Scale: 0% - {insights.chartScale}%</span>
+            </div>
             <div className="category-bars-list">
               {insights.categoryDetails.map((category, index) => {
-                const percentUsed = Math.min(category.percentUsed, 150); // Cap display at 150%
+                // Scale the bar width relative to chartScale (not 100%)
+                const scaledWidth = (category.percentUsed / insights.chartScale) * 100;
+                const clampedWidth = Math.min(scaledWidth, 100); // Never exceed track width
+                
+                // Calculate where 100% marker should be positioned
+                const marker100Position = (100 / insights.chartScale) * 100;
+                
                 const isOverBudget = category.percentUsed > 100;
                 const isNearBudget = category.percentUsed > 80 && category.percentUsed <= 100;
                 
@@ -242,9 +287,19 @@ const WeeklyInsights = ({ isSignedIn }) => {
                     </div>
                     <div className="category-bar-wrapper">
                       <div className="category-bar-track">
+                        {/* 100% Budget Marker */}
+                        {insights.chartScale > 100 && (
+                          <div 
+                            className="budget-marker-line" 
+                            style={{ left: `${marker100Position}%` }}
+                          >
+                            <span className="budget-marker-label">100%</span>
+                          </div>
+                        )}
+                        
                         <div 
                           className={`category-bar-fill ${isOverBudget ? 'over-budget' : isNearBudget ? 'near-budget' : 'good'}`}
-                          style={{ width: `${percentUsed}%` }}
+                          style={{ width: `${clampedWidth}%` }}
                         >
                           <span className="category-bar-percent">
                             {category.percentUsed.toFixed(0)}%

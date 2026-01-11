@@ -985,4 +985,124 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   .submit-button {
     padding: 16px 20px;
   }
+  /* Week Filter for Insights */
+  .insights-filter {
+    margin-bottom: 20px;
+  }
+
+  .insights-filter .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  .insights-filter .filter-group label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #2b2b2b;
+    text-align: center;
+  }
+
+  .insights-filter .filter-dropdown {
+    width: 100%;
+    padding: 12px 40px 12px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    border: 1px solid #c8c3b8;
+    background-color: #fff;
+    color: #2b2b2b;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232b2b2b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+  }
+
+  .insights-filter .filter-dropdown:focus {
+    outline: none;
+    border-color: #2b2b2b;
+  }
+
+  /* Category Bars Legend */
+  .category-bars-legend {
+    text-align: center;
+    margin-bottom: 16px;
+    padding: 8px;
+    background-color: #f8f8f8;
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+  }
+
+  .legend-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: #666;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* 100% Budget Marker */
+  .budget-marker-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #2b2b2b;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .budget-marker-line::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -3px;
+    width: 8px;
+    height: 8px;
+    background-color: #2b2b2b;
+    border-radius: 50%;
+  }
+
+  .budget-marker-line::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: -3px;
+    width: 8px;
+    height: 8px;
+    background-color: #2b2b2b;
+    border-radius: 50%;
+  }
+
+  .budget-marker-label {
+    position: absolute;
+    top: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-weight: 700;
+    color: #2b2b2b;
+    background-color: #fff;
+    padding: 2px 6px;
+    border: 1px solid #2b2b2b;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .insights-filter .filter-group {
+      max-width: 100%;
+    }
+    
+    .budget-marker-label {
+      font-size: 9px;
+      padding: 1px 4px;
+    }
+  }
 }
