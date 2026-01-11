@@ -196,13 +196,11 @@ const CumulativeBudgetTracker = ({ isSignedIn }) => {
     }
 
     // Calculate metrics
+    const totalBudgetToDate = weeklyBudget * currentWeekNum;
+    const totalSpendDelta = totalSpendToDate - totalBudgetToDate;
     const averageWeeklySpend = currentWeekNum > 0 ? totalSpendToDate / currentWeekNum : 0;
     const budgetedAverageWeeklySpend = weeklyBudget;
-    const totalBudgetToDate = weeklyBudget * currentWeekNum;
-    const variance = averageWeeklySpend - budgetedAverageWeeklySpend;
-    const variancePercent = budgetedAverageWeeklySpend > 0 
-      ? ((averageWeeklySpend - budgetedAverageWeeklySpend) / budgetedAverageWeeklySpend) * 100 
-      : 0;
+    const weeklySpendDelta = averageWeeklySpend - budgetedAverageWeeklySpend;
 
     const chartData = {
       labels: weekLabels,
@@ -237,11 +235,11 @@ const CumulativeBudgetTracker = ({ isSignedIn }) => {
 
     const metrics = {
       totalSpendToDate,
+      totalBudgetToDate,
+      totalSpendDelta,
       averageWeeklySpend,
       budgetedAverageWeeklySpend,
-      totalBudgetToDate,
-      variance,
-      variancePercent,
+      weeklySpendDelta,
       currentWeekNum
     };
 
@@ -359,29 +357,29 @@ const CumulativeBudgetTracker = ({ isSignedIn }) => {
             <div className="metric-card">
               <span className="metric-label">Total Spend to Date</span>
               <span className="metric-value">${metrics.totalSpendToDate.toFixed(2)}</span>
+              <span className={`metric-subtext ${metrics.totalSpendDelta < 0 ? 'positive' : 'negative'}`}>
+                {metrics.totalSpendDelta < 0 ? '' : '+'}${metrics.totalSpendDelta.toFixed(2)} vs budget
+              </span>
+            </div>
+            
+            <div className="metric-card">
+              <span className="metric-label">Total Budget to Date</span>
+              <span className="metric-value">${metrics.totalBudgetToDate.toFixed(2)}</span>
               <span className="metric-subtext">Through Week {metrics.currentWeekNum}</span>
             </div>
             
             <div className="metric-card">
               <span className="metric-label">Average Weekly Spend</span>
               <span className="metric-value">${metrics.averageWeeklySpend.toFixed(2)}</span>
-              <span className={`metric-subtext ${metrics.variance > 0 ? 'negative' : 'positive'}`}>
-                {metrics.variance > 0 ? '+' : ''}${metrics.variance.toFixed(2)} vs budget
+              <span className={`metric-subtext ${metrics.weeklySpendDelta < 0 ? 'positive' : 'negative'}`}>
+                {metrics.weeklySpendDelta < 0 ? '' : '+'}${metrics.weeklySpendDelta.toFixed(2)} vs budget
               </span>
             </div>
             
             <div className="metric-card">
-              <span className="metric-label">Budgeted Weekly Average</span>
+              <span className="metric-label">Budgeted Weekly Spend</span>
               <span className="metric-value">${metrics.budgetedAverageWeeklySpend.toFixed(2)}</span>
               <span className="metric-subtext">Target per week</span>
-            </div>
-            
-            <div className="metric-card">
-              <span className="metric-label">Total Budget to Date</span>
-              <span className="metric-value">${metrics.totalBudgetToDate.toFixed(2)}</span>
-              <span className={`metric-subtext ${metrics.totalSpendToDate > metrics.totalBudgetToDate ? 'negative' : 'positive'}`}>
-                {metrics.totalSpendToDate <= metrics.totalBudgetToDate ? '✓ On Track' : '⚠️ Over Budget'}
-              </span>
             </div>
           </div>
         </div>
