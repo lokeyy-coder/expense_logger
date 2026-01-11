@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SpendingChart from './SpendingChart';
 import TransactionsList from './TransactionsList';
 import WeeklyInsights from './WeeklyInsights';
+import CumulativeBudgetTracker from './CumulativeBudgetTracker';
 
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
@@ -349,6 +350,23 @@ const ExpenseLogger = () => {
             {expandedSection === 'transactions' && (
               <div className="menu-item-content">
                 <TransactionsList isSignedIn={isSignedIn} categories={categories} />
+              </div>
+            )}
+          </div>
+
+          {/* Menu Item 5: Cumulative Budget Tracker */}
+          <div className="menu-item-container">
+            <button 
+              className={`menu-item ${expandedSection === 'cumulative-tracker' ? 'active' : ''}`}
+              onClick={() => toggleSection('cumulative-tracker')}
+            >
+              <span className="menu-item-icon">💰</span>
+              <span className="menu-item-text">SEE SPENDING CATEGORY RUNNING TOTALS</span>
+              <span className="menu-item-arrow">{expandedSection === 'cumulative-tracker' ? '▼' : '▶'}</span>
+            </button>
+            {expandedSection === 'cumulative-tracker' && (
+              <div className="menu-item-content">
+                <CumulativeBudgetTracker isSignedIn={isSignedIn} />
               </div>
             )}
           </div>

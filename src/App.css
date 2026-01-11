@@ -1197,4 +1197,142 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   .menu-title {
     font-size: 20px;
   }
+  /* Cumulative Budget Tracker Styles */
+  .cumulative-tracker-container {
+    background-color: #fff;
+    border: 1px solid #c8c3b8;
+    padding: 30px;
+    margin-bottom: 0;
+  }
+
+  .tracker-title {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #2b2b2b;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .tracker-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 30px;
+  }
+
+  .tracker-controls .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .tracker-controls .filter-group label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #2b2b2b;
+    text-align: center;
+  }
+
+  /* Tracker Metrics */
+  .tracker-metrics {
+    margin-bottom: 30px;
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .metric-card {
+    background-color: #f8f8f8;
+    border: 2px solid #c8c3b8;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .metric-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #666;
+  }
+
+  .metric-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #2b2b2b;
+    line-height: 1.2;
+  }
+
+  .metric-subtext {
+    font-size: 12px;
+    font-weight: 500;
+    color: #666;
+  }
+
+  .metric-subtext.positive {
+    color: #4caf50;
+    font-weight: 600;
+  }
+
+  .metric-subtext.negative {
+    color: #d32f2f;
+    font-weight: 600;
+  }
+
+  /* Tracker Chart */
+  .tracker-chart-wrapper {
+    height: 500px;
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #fafafa;
+    border: 2px solid #2b2b2b;
+    border-radius: 4px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .metrics-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    
+    .tracker-chart-wrapper {
+      height: 400px;
+      padding: 16px;
+    }
+    
+    .tracker-controls .filter-group {
+      max-width: 100%;
+    }
+    
+    .metric-value {
+      font-size: 20px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .tracker-title {
+      font-size: 22px;
+    }
+    
+    .cumulative-tracker-container {
+      padding: 20px;
+    }
+    
+    .tracker-chart-wrapper {
+      height: 350px;
+    }
+  }
 }
