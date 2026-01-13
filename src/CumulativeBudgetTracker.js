@@ -194,6 +194,7 @@ const CumulativeBudgetTracker = ({ isSignedIn }) => {
       // Parse date and check if it's not in the future
       if (dateStr) {
         const transactionDate = new Date(dateStr);
+        transactionDate.setHours(0,0,0,0); 
         if (transactionDate > today) return; // Skip future transactions
       }
       
